@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const usersRouter = require('./routes/users')
 
 require('dotenv').config()
 
@@ -8,6 +9,8 @@ const app = express()
 //Middlewares
 app.use(cors())
 app.use(express.json())
+
+app.use('/users', usersRouter)
 
 app.get('/', (req, res) => {
     res.send('Hello World!')

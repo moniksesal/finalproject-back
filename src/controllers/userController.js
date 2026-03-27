@@ -15,7 +15,7 @@ const userController = {
     // registro de usuario
     registerUser: async (req, res) => {
         try {
-            const {nombre, email, password, edad, objective_id} = req.body
+            const {nombre, email, password, edad, objective_id, plan} = req.body
 
             //comprobamos si ya existe
             const existingUser = await User.findByEmail(email)
@@ -24,7 +24,7 @@ const userController = {
             }
 
             //crear usuario
-            const user = await User.create({nombre, email, password, edad, objective_id})
+            const user = await User.create({nombre, email, password, edad, objective_id, plan})
 
             //generar token
             const token = generateToken(user)

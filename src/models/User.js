@@ -10,7 +10,7 @@ const User = {
             //Encriptar la contraseña
             const hashedPassword = await bcrypt.hash(password, 10) //transforma la contraseña original en un código irreconocible. 10 es el num de rondas de encriptación, cuanto mayor, más seguro pero más lento. 10 es num estandar.
 
-            const [result] = await db.execute( //db.execute(query, valores)
+            const [result] = await db.execute( //db.execute(query, valores) mejor usar execute porque hay contraseña, es más seguro que query
                 'INSERT INTO users (nombre, email, password, edad, objective_id, plan) VALUES (?, ?, ?, ?, ?, ?)',
                 [nombre, email, hashedPassword, edad, objective_id, plan] //se hace asi para evitar SQL injection
             ) //devuelve [result, fields] solo nos interesa result, por eso lo desestructuramos
@@ -52,5 +52,5 @@ module.exports = User
 
 
 /* db.execute(), el primer elemento es el resultado de la consulta.
-Si es un INSERT/UPDATE/DELETE, al objeto con info lo llamamos [result] --> Resultado de una operación
-Si es un SELECT, al objeto con info lo llamamos [rows] --> Filas devueltas*/
+Si es un INSERT/UPDATE/DELETE, al objeto con info lo llamamos [result] --> Resultado de una operación --> Result devuelve normalmente un id
+Si es un SELECT, al objeto con info lo llamamos [rows] --> Filas devueltas* --> Rows devuelve objetos completos(filas)*/

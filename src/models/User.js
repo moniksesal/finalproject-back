@@ -52,5 +52,5 @@ module.exports = User
 
 
 /* db.execute(), el primer elemento es el resultado de la consulta.
-Si es un INSERT/UPDATE/DELETE, al objeto con info lo llamamos [result] --> Resultado de una operación --> Result devuelve normalmente un id
+Si es un INSERT/UPDATE/DELETE, al objeto con info lo llamamos [result] --> Resultado de una operación --> objeto con info de la operación: insertId, affectedRows, warninStatus, usamos normalmente el insertId
 Si es un SELECT, al objeto con info lo llamamos [rows] --> Filas devueltas* --> Rows devuelve objetos completos(filas)*/

@@ -12,7 +12,7 @@ const routinesController = {
 
             //añadir dias a la rutina
             if (Array.isArray(dias) && dias.length > 0) {
-                await Routine.addRoutineDays(routineId, user_id, dias)
+                await Routine.addRoutineDays({routine_id: routineId, user_id, dias})
             }
 
             res.json({message: 'Rutina creada correctamente', routineId})
@@ -33,7 +33,27 @@ const routinesController = {
             console.error(error)
             res.status(500).json({message: 'Error obteniendo rutinas'})
         }
-    }
+    },
+
+    //obtener rutina por Id
+    getRoutineByIdController: async (req, res) => {
+        try {
+            const { id } = req.params
+            const routine = await Routine.getRoutineById(id)
+            if (!routine) {
+                return res.status(404).json({message: 'Rutina no encontrada'})
+            }
+
+            const dias = await Routine.getRoutineDays(id)
+
+            res.json({...routine, dias})
+
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({message: 'Error obteniendo rutina'})
+        }
+    },
+
 }
 
 module.exports = routinesController

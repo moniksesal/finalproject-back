@@ -2,7 +2,11 @@ const express = require('express')
 const cors = require('cors')
 const usersRouter = require('./routes/users')
 const habitsRouter = require('./routes/habits')
-const routinesRouter = require('./routes/routines');
+const routinesRouter = require('./routes/routines')
+const workoutsRouter = require('./routes/workouts')
+const objectivesRouter = require('./routes/objectives')
+const exercisesRouter = require('./routes/exercises')
+const dashboardRouter = require('./routes/dashboard')
 
 require('dotenv').config()
 
@@ -15,7 +19,10 @@ app.use(express.json())
 app.use('/users', usersRouter)
 app.use('/habits', habitsRouter)
 app.use('/routines', routinesRouter)
-
+app.use('/workouts', workoutsRouter)
+app.use('/objectives', objectivesRouter)
+app.use('/exercises', exercisesRouter)
+app.use('/dashboard', dashboardRouter)
 
 app.get('/', (req, res) => {
     res.send('Hello World!')

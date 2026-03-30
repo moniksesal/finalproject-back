@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const auth = require('../middleware/auth')
-const { createHabitController, getHabitsController, updateHabitController } = require('../controllers/habitsController')
+const {createHabitController, getHabitsController, updateHabitController} = require('../controllers/habitsController')
 
 //crear hábito
 router.post('/', auth, createHabitController)

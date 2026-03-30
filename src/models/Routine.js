@@ -25,7 +25,51 @@ const Routine = {
             'SELECT * FROM routines WHERE user_id = ?',
             [user_id]
         )
+
+        for (let row of rows) {
+            const [days] = await db.query(
+                'SELECT dia FROM routine_days WHERE routine_id = ?',
+                [row.id]
+            )
+            row.dias = days.map(d=>d.dia)
+        }
         return rows
+    },
+
+    //obtener rutina por id
+    getRoutineById: async (routine_id) => {
+        //rutina
+        const [routineRows] = await db.query(
+            'SELECT * FROM routines WHERE id = ?',
+            [routine_id]
+        )
+        if (routineRows.length === 0) return null
+        const routine = routineRows[0]
+
+        //dias
+        const [daysRows] = await db.query(
+            'SELECT dia FROM routine_days WHERE routine_id = ?',
+            [routine_id]
+        )
+        routine.dias = daysRows.map(row => row.dia)
+
+        //ejercicios
+        const [exercisesRows] = await db.query(
+            'SELECT e.nombre, re.series, re.repeticiones, re.descanso FROM routine_exercises re JOIN exercises e ON re.exercise_id = e.id WHERE re.routine_id = ?',
+            [routine_id]
+        )
+
+        routine.exercises = exercisesRows
+        return routine
+    },
+
+    //traer los dias
+    getRoutineDays: async (routine_id) => {
+        const [rows] = await db.query(
+            'SELECT dia FROM routine_days WHERE routine_id = ?',
+            [routine_id]
+        )
+        return rows.map(r => r.dia)
     }
 }
 

@@ -7,10 +7,8 @@ const createExerciseController = async (req, res) => {
         const user_id = req.user.id
 
         // comprobar plan
-        const [[user]] = await db.query( // [[user]] es lo mismo que: const result = await db.query(...) // const user = result[0][0]
-            `SELECT plan FROM users WHERE id = ?`,
-            [user_id]
-        )
+        const [rows] = await db.query( 'SELECT plan FROM users WHERE id = ?', [user_id])
+        const user = rows[0]
 
         if (user.plan !== 'premium') {
             return res.status(403).json({message: 'Solo usuarios premium pueden crear ejercicios'}) //error 404: el servidor ha entendido la solicitud del usuario, pero niega el acceso al recurso solicitado
@@ -44,8 +42,9 @@ const getExercisesController = async (req, res) => {
 const updateExerciseController = async (req, res) => {
     try {
         const user_id = req.user.id
-        const affectedRows = await updateExercise({user_id, ...req.body})
-        if (affectedRows === 0) return res.status(404).json({message: 'Ejercicio no encontrado'})
+        const {id} = req.params
+        const affectedRows = await updateExercise({id, user_id, ...req.body})
+        if (affectedRows === 0) return res.status(404).json({message: 'Ejercicio no encontrado o no autorizado'})
         res.json({message: 'Ejercicio actualizado'})
     } catch (error) {
         console.error(error)
@@ -66,5 +65,7 @@ const deleteExerciseController = async (req, res) => {
         res.status(500).json({message: 'Error eliminando ejercicio'})
     }
 }
+
+
 
 module.exports = {createExerciseController, getExercisesController, updateExerciseController, deleteExerciseController}

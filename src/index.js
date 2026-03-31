@@ -7,6 +7,8 @@ const workoutsRouter = require('./routes/workouts')
 const objectivesRouter = require('./routes/objectives')
 const exercisesRouter = require('./routes/exercises')
 const dashboardRouter = require('./routes/dashboard')
+const progressRouter = require('./routes/progress')
+
 
 require('dotenv').config()
 
@@ -23,6 +25,7 @@ app.use('/workouts', workoutsRouter)
 app.use('/objectives', objectivesRouter)
 app.use('/exercises', exercisesRouter)
 app.use('/dashboard', dashboardRouter)
+app.use('/progress', progressRouter)
 
 app.get('/', (req, res) => {
     res.send('Hello World!')

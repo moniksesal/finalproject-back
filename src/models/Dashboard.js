@@ -57,4 +57,21 @@ const getObjective = async (user_id) => {
     return rows[0] || null
 }
 
-module.exports = {getLastWorkouts, getStats, getUserRoutines, getHabits, getObjective}
+//estadísticas de workouts del usuario en los últimos 7 días
+const getWorkoutStats = async (user_id) => {
+    const [rows] = await db.query(`
+        SELECT COUNT(*) as total, 
+            AVG(
+                CASE feeling
+                WHEN 'facil' THEN 1
+                WHEN 'justo' THEN 2
+                WHEN 'dificil' THEN 3
+                END
+            ) AS avgFeeling
+        FROM workouts
+        WHERE user_id = ? AND fecha >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    `, [user_id]) //sacar el promedio de la columna feeling en los últimos 7 dias. convierte los feeling en numero para poder después hacer la condición en el controlador
+    return rows[0]
+}
+
+module.exports = {getLastWorkouts, getStats, getUserRoutines, getHabits, getObjective, getWorkoutStats}

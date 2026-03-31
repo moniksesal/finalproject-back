@@ -2,7 +2,7 @@ const db = require('../db')
 
 const Routine = {
     createRoutine: async ({user_id, nombre}) => {
-        [result] = await db.query(
+        const [result] = await db.query(
             'INSERT INTO routines (user_id, nombre) VALUES (?, ?)',
             [user_id, nombre]
         )

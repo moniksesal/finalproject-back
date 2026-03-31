@@ -71,7 +71,7 @@ const getWorkoutById = async (workout_id, user_id) => {
             we.peso
         FROM workouts w
         LEFT JOIN routines r ON w.routine_id = r.id
-        LEFT JOIN workoutS_exercises we ON w.id = we.workout_id
+        LEFT JOIN workouts_exercises we ON w.id = we.workout_id
         LEFT JOIN exercises e ON we.exercise_id = e.id
         WHERE w.id = ? AND w.user_id = ?
     `, [workout_id, user_id])

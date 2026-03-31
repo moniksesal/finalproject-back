@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const db = require('../db')
 const User = require('../models/User')
 require('dotenv').config()
 
@@ -60,6 +61,24 @@ const userController = {
         } catch (error) {
             console.error(error)
             res.status(500).json({message:'Error al iniciar sesión'})
+        }
+    },
+
+    updatePlanController: async (req, res) => {
+        try {
+            const user_id = req.user.id
+            const {plan} = req.body
+
+            if (!['free', 'premium'].includes(plan)) {
+                return res.status(400).json({message: 'Plan no válido'})
+            }
+
+            await db.query('UPDATE users SET plan = ? WHERE id = ?', [plan, user_id])
+
+            res.json({message: `Plan actualizado a ${plan}`})
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({message: "Error actualizando plan"})
         }
     }
 }

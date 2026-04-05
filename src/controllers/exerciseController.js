@@ -4,22 +4,35 @@ const db = require('../db')
 // crear ejercicio
 const createExerciseController = async (req, res) => {
     try {
-        const user_id = req.user.id
+        const user_id = req.user.id; // Esto viene del token
 
-        // comprobar plan
-        const [rows] = await db.query( 'SELECT plan FROM users WHERE id = ?', [user_id])
-        const user = rows[0]
-
-        if (user.plan !== 'premium') {
-            return res.status(403).json({message: 'Solo usuarios premium pueden crear ejercicios'}) //error 404: el servidor ha entendido la solicitud del usuario, pero niega el acceso al recurso solicitado
+        //buscar plan real y actualizado en la base de datos
+        const [rows] = await db.query('SELECT plan FROM users WHERE id = ?', [user_id])
+        
+        if (rows.length === 0) {
+            return res.status(404).json({message: 'Usuario no encontrado'})
         }
 
+        const userActualizado = rows[0]
+
+        //comprobamos el plan
+        if (userActualizado.plan !== 'premium') {
+            return res.status(403).json({message: 'Solo usuarios premium pueden crear ejercicios'})
+        }
+
+        //si es premium... 
+        const { nombre, descripcion, imagen_url, video_url } = req.body
+
         const exerciseId = await createExercise({
-            user_id,
-            ...req.body
+            nombre,
+            descripcion,
+            imagen_url,
+            video_url,
+            user_id
         })
 
         res.json({message: 'Ejercicio creado', exerciseId})
+
     } catch (error) {
         console.error(error)
         res.status(500).json({message: 'Error creando ejercicio'})

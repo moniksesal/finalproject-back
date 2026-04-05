@@ -16,6 +16,7 @@ const userController = {
     // registro de usuario
     registerUser: async (req, res) => {
         try {
+            // Mantenemos solo tus campos originales
             const {nombre, email, password, edad, objective_id, plan} = req.body
 
             //comprobamos si ya existe
@@ -30,6 +31,7 @@ const userController = {
             //generar token
             const token = generateToken(user)
             
+            // Devolvemos el usuario creado (que incluye el nombre) y el token
             res.status(201).json({user, token})
         } catch (error) {
             console.error(error)
@@ -64,6 +66,7 @@ const userController = {
         }
     },
 
+    //actualizar plan
     updatePlanController: async (req, res) => {
         try {
             const user_id = req.user.id
@@ -79,6 +82,25 @@ const userController = {
         } catch (error) {
             console.error(error)
             res.status(500).json({message: "Error actualizando plan"})
+        }
+    },
+
+    //obtener perfil
+    getProfile: getProfile = async (req, res) => {
+        try {
+            //El ID viene del token decodificado en el middleware 'auth'
+            const userId = req.user.id
+
+            const user = await User.findById(userId)
+
+            if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado" })
+            }
+
+            res.json(user)
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({message: "Error al obtener los datos del perfil"})
         }
     }
 }

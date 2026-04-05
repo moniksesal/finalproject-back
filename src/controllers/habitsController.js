@@ -1,22 +1,15 @@
-const { createHabit, getHabitsByUser, updateHabit } = require('../models/Habit')
+const Habit = require('../models/Habit')
 
-//crear hábito
-const createHabitController = async (req, res) => {
-    try {
-        const user_id = req.user.id
-        const habitId = await createHabit({user_id, ...req.body})
-        res.json({message: 'Hábito creado', habitId})
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({ message: 'Error creando hábito' })
-    }
-}
-
-// obtener hábitos del usuario
+//Obtener los hábitos
 const getHabitsController = async (req, res) => {
     try {
         const user_id = req.user.id
-        const habits = await getHabitsByUser(user_id)
+        const habits = await Habit.getHabitsByUser(user_id)
+        
+        if (!habits) {
+            return res.status(200).json({message: "No hay hábitos registrados", habits: null})
+        }
+        
         res.json(habits)
     } catch (error) {
         console.error(error)
@@ -24,19 +17,23 @@ const getHabitsController = async (req, res) => {
     }
 }
 
-//actualizar hábito
-const updateHabitController = async (req, res) => {
+//guardar habitos
+const saveHabitsController = async (req, res) => {
     try {
-        const user_id = req.user.id;
-        const affectedRows = await updateHabit({ user_id, ...req.body })
-        if (affectedRows === 0) {
-            return res.status(404).json({message: 'Hábito no encontrado'})
+        const user_id = req.user.id
+        const { sueno, agua, tabaco, alcohol } = req.body
+
+        if (sueno === undefined || agua === undefined) {
+            return res.status(400).json({message: "Sueño y agua son campos obligatorios"})
         }
-        res.json({message: 'Hábito actualizado'})
+
+        const result = await Habit.upsertHabits(user_id, {sueno, agua, tabaco, alcohol})
+
+        res.json({message: result.type === 'INSERT' ? 'Hábitos creados con éxito' : 'Hábitos actualizados correctamente', data: result})
     } catch (error) {
         console.error(error)
-        res.status(500).json({message: 'Error actualizando hábito'})
+        res.status(500).json({message: 'Error al procesar los hábitos'})
     }
 }
 
-module.exports = {createHabitController, getHabitsController, updateHabitController}
+module.exports = {getHabitsController, saveHabitsController}

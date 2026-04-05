@@ -1,4 +1,4 @@
-const { createWorkout, getWorkoutsByUser, getWorkoutById, updateWorkout, deleteWorkout } = require('../models/Workout')
+const Workout = require('../models/Workout')
 
 const createWorkoutController = async (req, res) => {
     try {
@@ -10,7 +10,7 @@ const createWorkoutController = async (req, res) => {
             return res.status(400).json({message: 'Faltan datos'})
         }
 
-        const workoutId = await createWorkout(user_id, {routine_id, fecha, feeling, exercises})
+        const workoutId = await Workout.createWorkout(user_id, {routine_id, fecha, feeling, exercises})
 
         res.status(201).json({message: 'Tarea realizada con éxito'})
     } catch (error) {
@@ -22,7 +22,7 @@ const createWorkoutController = async (req, res) => {
 const getWorkoutsController = async (req, res) => {
     try {
         const user_id = req.user.id
-        const workouts = await getWorkoutsByUser(user_id)
+        const workouts = await Workout.getWorkoutsByUser(user_id)
         res.json(workouts)
     } catch (error) {
         console.error(error)
@@ -34,7 +34,7 @@ const getWorkoutByIdControler = async (req, res) => {
     try {
         const user_id = req.user.id
         const {id} = req.params
-        const rows = await getWorkoutById(id, user_id)
+        const rows = await Workout.getWorkoutById(id, user_id)
         console.log(rows)
 
         if (rows.length === 0) {
@@ -83,7 +83,7 @@ const updateWorkoutController = async (req, res) => {
         const {fecha, feeling, exercises} = req.body
 
         //comprobar que el workout pertenece al usuario
-        const [rows] = await getWorkoutById(id, user_id)
+        const [rows] = await Workout.getWorkoutById(id, user_id)
         if (rows.length === 0) return res.status(404).json({message: 'Workout no encontrado'})
         
         await updateWorkout(id, {fecha, feeling, exercises})
@@ -100,7 +100,7 @@ const deleteWorkoutController = async (req, res) => {
         const {id} = req.params
 
         //comprobar que el workout pertenece al usuario
-        const [rows] = await getWorkoutById(id, user_id)
+        const [rows] = await Workout.getWorkoutById(id, user_id)
         if (!rows || rows.length === 0) return res.status(404).json({message: 'Workout no encontrado'})
 
         await deleteWorkout(id)

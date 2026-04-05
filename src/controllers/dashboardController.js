@@ -1,56 +1,65 @@
-const {getLastWorkouts, getStats, getUserRoutines, getHabits, getObjective, getWorkoutStats} = require('../models/Dashboard')
+const {getLastWorkouts, getStats, getUserRoutines, getHabits, getObjective, getWorkoutStats} = require('../models/Dashboard');
 
-const getDashboardController = async (req, res) => {
+const getDashboardData = async (req, res) => {
     try {
-        const user_id = req.user.id
+        const user_id = req.user.id;
+        const user_nombre = req.user.nombre;
 
-        const lastWorkouts = await getLastWorkouts(user_id)
-        const stats = await getStats(user_id)
-        const routines = await getUserRoutines(user_id)
-        const habits = await getHabits(user_id)
-        const objective = await getObjective(user_id)
+        const [lastWorkouts, stats, routines, habits, objective, recentStats] = await Promise.all([ //hace varias promesas a la vez
+            getLastWorkouts(user_id, 1), //solo el ultimo workout
+            getStats(user_id),
+            getUserRoutines(user_id),
+            getHabits(user_id),
+            getObjective(user_id),
+            getWorkoutStats(user_id)
+        ])
 
-        res.json({lastWorkouts, stats, routines, habits, objective})
-    } catch (error) {
-        console.error(error)
-        res.status(500).json({message: 'Error obteniendo dashboard'})
-    }
-}
+        //mensajes inteligentes
+        let smartMessage = `¡Hola! ¿List@ para superar tus marcas hoy?`
+        let tipType = 'info' //lo usamos luego para el front
 
-const getTipsController = async (req, res) => {
-    try {
-        const user_id = req.user.id
-        const stats = await getWorkoutStats(user_id)
-        const tips = []
-
-        //tip 1: constancia
-        if (stats.total < 2) {
-            tips.push('Llevas pocos entrenamientos esta semana, intenta ser más constante.')
-        } else if (stats.total >= 3) {
-            tips.push('Buen trabajo, estás siendo constante')
-        }
-
-        // tip 2: feeling
-        if (stats.avgFeeling !== null) {
-            if (stats.avFeeling < 1.5) {
-                tips.push('La rutina está siendo demasiado fácil para ti. ¡Sube un poco el peso o añade repeticiones!')
-            } else if (stats.avFeeling > 2.5) {
-                tips.push('La rutina está siendo muy exigente. Pon especial atención a tu técnica o ajusta series si hace falta.')
-            } else {
-                tips.push('Vas perfect@ con la intensidad actual. Sigue así.')
+        if (habits) {
+            if (habits.sueno < 6) {
+                smartMessage = "Has dormido menos de 6h. El riesgo de lesión aumenta, entrena con cargas moderadas."
+                tipType = 'warning'
+            } else if (habits.agua === 'baja') {
+                smartMessage = "Tu hidratación es baja. Beber agua durante el entreno evitará calambres."
+                tipType = 'warning'
             }
         }
-        // reespaldo por si no se cumple ninguna de las condiciones anteriores
-        if (tips.length === 0) {
-            tips.push('Sigue así, vas por buen camino 💪')
+
+        //feedback de los ultimos 7dias
+        let workoutFeedback = null
+        if (recentStats && recentStats.total > 0) {
+            if (recentStats.avgFeeling < 1.5) { //facil
+                workoutFeedback = `🔥 Promedio de la semana: ¡Muy fácil! Es hora de subir los pesos gradualmente.`
+            } else if (recentStats.avgFeeling > 2.5) { //dificil promedio
+                workoutFeedback = `🧊 Semana intensa. Asegúrate de descansar 48h entre grupos musculares.`
+            }
         }
 
-        res.json({tips})
-
+        res.json({
+            user_info: {
+                nombre: user_nombre,
+                objetivo: objective ? objective.name : 'Sin objetivo definido'
+            },
+            summary: {
+                total_rutinas: routines.length,
+                total_ejercicios_realizados: stats.totalExercises,
+                feeling_stats: stats.feelingStats,
+                ultimo_entreno: lastWorkouts[0] || null
+            },
+            coach: {
+                message: smartMessage,
+                type: tipType,
+                suggestion: workoutFeedback,
+                empty_state: routines.length === 0
+            }
+        })
     } catch (error) {
         console.error(error)
-        res.status(500).json({ message: 'Error obteniendo tips' })
+        res.status(500).json({message: "Error al cargar los datos del dashboard"})
     }
 }
 
-module.exports = {getDashboardController, getTipsController}
+module.exports = {getDashboardData}

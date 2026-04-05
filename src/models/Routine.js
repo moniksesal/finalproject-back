@@ -55,7 +55,7 @@ const Routine = {
 
         //ejercicios
         const [exercisesRows] = await db.query(
-            'SELECT e.nombre, re.series, re.repeticiones, re.descanso FROM routine_exercises re JOIN exercises e ON re.exercise_id = e.id WHERE re.routine_id = ?',
+            'SELECT re.id, re.series, re.repeticiones, re. descanso, e.nombre, e.descripcion, e.imagen_url, e.video_url FROM routine_exercises re JOIN exercises e ON re.exercise_id = e.id WHERE re.routine_id = ?',
             [routine_id]
         )
 
@@ -70,6 +70,17 @@ const Routine = {
             [routine_id]
         )
         return rows.map(r => r.dia)
+    },
+
+    //borrar rutina por id (y sus dias y ejs asociados)
+    deleteRoutine: async (routine_id) => {
+        // borrar ejercicios asociados
+        await db.query('DELETE FROM routine_exercises WHERE routine_id = ?', [routine_id])
+        // borrar días asociados
+        await db.query('DELETE FROM routine_days WHERE routine_id = ?', [routine_id])
+        // borrar la rutina
+        const [result] = await db.query('DELETE FROM routines WHERE id = ?', [routine_id])
+        return result.affectedRows; //devuelve 1 si borró algo
     }
 }
 

@@ -27,9 +27,10 @@ app.use('/exercises', exercisesRouter)
 app.use('/dashboard', dashboardRouter)
 app.use('/progress', progressRouter)
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
+// Añade esto en index.js para que el frontend encuentre las rutas donde las busca
+app.post('/register', usersRouter); 
+app.post('/login', usersRouter);
+
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {

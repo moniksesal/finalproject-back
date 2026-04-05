@@ -1,7 +1,7 @@
 // Representación de la tabla SQL en código
 
 const db = require('../db')
-const bcrypt = require('bcrypt') // para encriptar contraseñas
+const bcrypt = require('bcrypt')
 
 const User = {
     //Crear un nuevo usuario
@@ -30,7 +30,7 @@ const User = {
         }
     },
 
-    // Buscar user por email
+    //Buscar user por email
     findByEmail: async (email) => {
         const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email])
         return rows[0]
@@ -38,7 +38,7 @@ const User = {
 
     //Buscar el usuario por id
     findById: async (id) => {
-        const [rows] = await db.execute('SELECT * FROM users WHERE id = ?', [id])
+        const [rows] = await db.execute('SELECT id, nombre, plan, edad, objective_id FROM users WHERE id = ?', [id])
         return rows[0]
     },
 

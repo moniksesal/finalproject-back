@@ -1,10 +1,10 @@
 const db = require('../db')
 
 // crear ejercicio (solo premium)
-const createExercise = async ({name, description, image_url, video_url, user_id}) => {
+const createExercise = async ({nombre, descripcion, imagen_url, video_url, user_id}) => {
     const [result] = await db.query(
         `INSERT INTO exercises (nombre, descripcion, imagen_url, video_url, user_id) VALUES (?, ?, ?, ?, ?)`,
-        [name, description, image_url, video_url, user_id]
+        [nombre, descripcion, imagen_url, video_url, user_id]
     )
     return result.insertId
 }

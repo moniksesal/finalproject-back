@@ -10,4 +10,6 @@ router.get('/', auth, routinesController.getRoutinesController)
 router.post('/exercises', auth, addExercisesController)
 router.get('/:id', auth, routinesController.getRoutineByIdController)
 
+router.delete('/:id', auth, routinesController.deleteRoutineController)
+
 module.exports = router

@@ -81,6 +81,15 @@ const Routine = {
         // borrar la rutina
         const [result] = await db.query('DELETE FROM routines WHERE id = ?', [routine_id])
         return result.affectedRows; //devuelve 1 si borró algo
+    },
+
+    // contar rutinas por usuario para validar límites de plan
+    countRoutinesByUser: async (user_id) => {
+        const [rows] = await db.query(
+            'SELECT COUNT(*) as total FROM routines WHERE user_id = ?',
+            [user_id]
+        )
+        return rows[0].total
     }
 }
 

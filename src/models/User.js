@@ -45,6 +45,15 @@ const User = {
     //Comprobnar contraseña
     comparePassword: async (password, hashedPassword) => {
         return await bcrypt.compare(password, hashedPassword)
+    },
+
+    //actualizar plan
+    updateUserPlan: async (userId, newPlan) => {
+        const [result] = await db.query(
+            'UPDATE users SET plan = ? WHERE id = ?',
+            [newPlan, userId]
+        )
+        return result.affectedRows;
     }
 }
 

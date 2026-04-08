@@ -1,34 +1,36 @@
 const db = require('../db')
 
 const Workout = {
-    //cvrear workout
-    createWorkout: async (user_id, {routine_id, fecha, feeling, exercises}) => {
-        //registro principal
+    // Crear workout
+    createWorkout: async (user_id, { routine_id, fecha, feeling, exercises }) => {
+        //cabecera del entrenamiento
         const [result] = await db.query(
             'INSERT INTO workouts (user_id, routine_id, fecha, feeling) VALUES (?, ?, ?, ?)',
             [user_id, routine_id, fecha || new Date(), feeling]
         )
-        const workout_id = result.insertId;
+        const workout_id = result.insertId
 
+        //Si hay ejercicios, insertar en bloque
         if (Array.isArray(exercises) && exercises.length > 0) {
             const values = []
-            //recorre los ejs, comprueba que es válido, recorre cada serie del ej, guarda los datos en values --> "aplana" los datos
-            exercises.forEach(ex => {
-                if (ex.id && Array.isArray(ex.series)) {
+            
+            exercises.forEach((ex) => {
+                const idParaInsertar = ex.exercise_id || ex.id
+                
+                if (idParaInsertar && Array.isArray(ex.series)) {
                     ex.series.forEach((serie, index) => {
                         values.push([
-                            workout_id,
-                            ex.id,
-                            index + 1, // empieza en 1, no en 0
-                            serie.repeticiones ?? 0,
+                            workout_id, 
+                            idParaInsertar, 
+                            index + 1, 
+                            serie.repeticiones ?? 0, 
                             serie.peso ?? 0
-                        ])//sirve para hacer un insert masivo en sql
+                        ])
                     })
                 }
             })
 
             if (values.length > 0) {
-                // 1 sola query para insertar a la vez todas las filas en los values de antes
                 await db.query(
                     'INSERT INTO workouts_exercises (workout_id, exercise_id, serie_num, repeticiones, peso) VALUES ?',
                     [values]
@@ -38,7 +40,7 @@ const Workout = {
         return workout_id
     },
 
-    //obtener los workouts
+    //Obtener workouts por usuario
     getWorkoutsByUser: async (user_id) => {
         //traemos los entrenamientos y el nombre de la rutina 
         const [workouts] = await db.query(`
@@ -52,7 +54,7 @@ const Workout = {
 
         if (workouts.length === 0) return []
 
-        //traemos todos los ejs/series de esos workouts en 1 sola query
+        //traemos todos los ejercicios/series de esos workouts en 1 sola query
         const workoutIds = workouts.map(w => w.id)
         const [allSeries] = await db.query(`
             SELECT we.*, e.nombre as exercise_nombre 
@@ -62,14 +64,14 @@ const Workout = {
             [workoutIds]
         )
 
-        //agrupamos las series dentro de cada workout
+        //Agrupamos las series dentro de cada workout correspondiente
         return workouts.map(w => ({
             ...w,
             exercises: allSeries.filter(s => s.workout_id === w.id)
         }))
     },
 
-    //workout por id
+    //Obtener workout por ID
     getWorkoutById: async (workout_id, user_id) => {
         const [rows] = await db.query(`
             SELECT 
@@ -88,23 +90,30 @@ const Workout = {
         return rows
     },
 
-    //actualizar workout
-    updateWorkout: async (workout_id, { fecha, feeling, exercises }) => {
-        //actualizamos datos básicos
+    //Actualizar workout
+    updateWorkout: async (workout_id, {fecha, feeling, exercises}) => {
+        //Actualizar datos
         await db.query(
             'UPDATE workouts SET fecha = ?, feeling = ? WHERE id = ?',
             [fecha, feeling, workout_id]
         )
 
-        //si hay ejercicios borrar y reinsertar 
+        //Si se envían ejercicios, borramos los anteriores y ponemos los nuevos
         if (Array.isArray(exercises) && exercises.length > 0) {
             await db.query('DELETE FROM workouts_exercises WHERE workout_id = ?', [workout_id])
 
             const values = []
             exercises.forEach(ex => {
-                if (ex.id && Array.isArray(ex.series)) {
+                const idParaInsertar = ex.exercise_id || ex.id
+                if (idParaInsertar && Array.isArray(ex.series)) {
                     ex.series.forEach((serie, index) => {
-                        values.push([workout_id, ex.id, index + 1, serie.repeticiones ?? 0, serie.peso ?? 0]) //??: si serie.repeticiones es null o undefined, usa 0, sino usa su valor
+                        values.push([
+                            workout_id, 
+                            idParaInsertar, 
+                            index + 1, 
+                            serie.repeticiones ?? 0, 
+                            serie.peso ?? 0
+                        ])
                     })
                 }
             })
@@ -119,7 +128,7 @@ const Workout = {
         return workout_id
     },
 
-    //eliminar workout
+    //Eliminar workout
     deleteWorkout: async (workout_id) => {
         const [result] = await db.query('DELETE FROM workouts WHERE id = ?', [workout_id])
         return result.affectedRows

@@ -86,7 +86,7 @@ const userController = {
     },
 
     //obtener perfil
-    getProfile: getProfile = async (req, res) => {
+    getProfile: async (req, res) => {
         try {
             //El ID viene del token decodificado en el middleware 'auth'
             const userId = req.user.id
@@ -101,6 +101,19 @@ const userController = {
         } catch (error) {
             console.error(error)
             res.status(500).json({message: "Error al obtener los datos del perfil"})
+        }
+    },
+
+    //actualizar plan
+    switchToFree: async (req, res) => {
+        try {
+            const userId = req.user.id
+            await User.updateUserPlan(userId, 'free')
+            res.status(200).json({ 
+                message: "Plan actualizado a Free." 
+            })
+        } catch (error) {
+            res.status(500).json({message: "Error al cambiar el plan", error: error.message})
         }
     }
 }
